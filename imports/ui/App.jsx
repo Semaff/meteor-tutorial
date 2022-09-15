@@ -3,6 +3,8 @@ import Task from './Task';
 import { useTracker } from "meteor/react-meteor-data";
 import { TasksCollection } from '../api/TasksCollection';
 import TaskForm from './TaskForm';
+import LoginForm from './LoginForm';
+import { Meteor } from "meteor/meteor";
 
 const toggleChecked = ({ _id, isChecked }) => {
     TasksCollection.update(_id, {
@@ -18,15 +20,33 @@ const deleteTask = ({ _id }) => {
 
 export const App = () => {
     const [hideCompleted, setHideCompleted] = useState(false);
+    const user = useTracker(() => Meteor.user());
+    const logout = () => Meteor.logout();
+
     const hideCompletedFilter = { isChecked: { $ne: true } };
+    const userFilter = user ? { userId: user._id } : {};
+    const pendingOnlyFilter = { ...hideCompletedFilter, ...userFilter };
 
     /* "useTracker" is something like "subscribe" in Redux */
     const tasks = useTracker(() => {
-        return TasksCollection.find(hideCompleted ? hideCompletedFilter : {}, { sort: { createdAt: -1 } }).fetch()
+        if (!user) {
+            return [];
+        }
+
+        return TasksCollection.find(
+            hideCompleted ? pendingOnlyFilter : userFilter,
+            {
+                sort: { createdAt: -1 }
+            }
+        ).fetch();
     });
 
     const pendingTasksCount = useTracker(() => {
-        return TasksCollection.find(hideCompletedFilter).count();
+        if (!user) {
+            return 0;
+        }
+
+        return TasksCollection.find(pendingOnlyFilter).count();
     });
 
     const pendingTasksTitle = `${pendingTasksCount ? ` (${pendingTasksCount})` : ''}`;
@@ -45,24 +65,35 @@ export const App = () => {
             </header>
 
             <div className="main">
-                <TaskForm />
+                {user
+                    ?
+                    <>
+                        <div className="user" onClick={logout}>
+                            {user.username} 🚪
+                        </div>
 
-                <div className="filter">
-                    <button onClick={() => setHideCompleted(prev => !prev)}>
-                        {hideCompleted ? "Show All" : "Hide Completed"}
-                    </button>
-                </div>
+                        <TaskForm user={user} />
 
-                <ul className="tasks">
-                    {tasks.map(task => (
-                        <Task
-                            key={task._id}
-                            task={task}
-                            onCheckboxClick={toggleChecked}
-                            onDeleteClick={deleteTask}
-                        />
-                    ))}
-                </ul>
+                        <div className="filter">
+                            <button onClick={() => setHideCompleted(prev => !prev)}>
+                                {hideCompleted ? "Show All" : "Hide Completed"}
+                            </button>
+                        </div>
+
+                        <ul className="tasks">
+                            {tasks.map(task => (
+                                <Task
+                                    key={task._id}
+                                    task={task}
+                                    onCheckboxClick={toggleChecked}
+                                    onDeleteClick={deleteTask}
+                                />
+                            ))}
+                        </ul>
+                    </>
+                    :
+                    <LoginForm />
+                }
             </div>
         </div>
     )
