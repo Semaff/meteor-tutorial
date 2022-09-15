@@ -1,8 +1,20 @@
 import React from 'react';
 
-const Task = ({ task }) => {
+const Task = ({ task, onCheckBoxClick, onDeleteClick }) => {
     return (
-        <li>{task.text}</li>
+        <li>
+            <input
+                type="checkbox"
+                checked={!!task.isChecked}
+                onClick={() => onCheckBoxClick(task)}
+                readOnly
+            />
+
+            <span>{task.text}</span>
+            <button onClick={() => onDeleteClick(task)}>
+                &times;
+            </button>
+        </li>
     )
 }
 
