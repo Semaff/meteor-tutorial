@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import React, { useState } from 'react';
+import LoginWithGitHub from './LoginWithGitHub';
 
 const LoginForm = () => {
     const [username, setUsername] = useState('');
@@ -12,6 +13,8 @@ const LoginForm = () => {
 
     return (
         <form onSubmit={submit} className="login-form">
+            <LoginWithGitHub />
+
             <div>
                 <label htmlFor="username">Username</label>
 
