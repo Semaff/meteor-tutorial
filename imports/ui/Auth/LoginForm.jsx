@@ -41,7 +41,7 @@ const LoginForm = () => {
                         id="password"
                         required
                         value={password}
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
                     <Button type='submit' variant='contained'>
