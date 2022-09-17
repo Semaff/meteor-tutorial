@@ -6,10 +6,11 @@ import ListItemText from '@mui/material/ListItemText';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Autocomplete, Box, CircularProgress, Grid, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, TextField } from '@mui/material';
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { TagsCollection } from '../../db/TagsCollection';
+import { TasksCollection } from '../../db/TasksCollection';
 
 const onTagAdd = (taskId, tagId) => {
     Meteor.call('tasks.setTags', taskId, tagId);
@@ -21,11 +22,27 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick }) => {
     const [isLoading, setIsLoading] = useState();
     const [timer, setTimer] = useState(null);
 
-    const { } = useTracker(() => {
+    useTracker(() => {
+        const handler = Meteor.subscribe("taskTagsCount", task._id);
+        if (!handler.ready()) {
+            return { isLoading: true };
+        }
+
+        const tagsCount = TasksCollection.findOne();
+        console.log(tagsCount)
+        return {};
+    })
+
+    useTracker(() => {
         const handler = Meteor.subscribe("tags");
         if (!handler.ready()) {
             setIsLoading(true);
             return { isLoading: true };
+        }
+
+        if (timer) {
+            clearTimeout(timer);
+            setTimer(null);
         }
 
         if (input.length <= 1) {
@@ -33,11 +50,6 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick }) => {
             setTags([...tags, ...task.tags]);
             setIsLoading(false);
         } else {
-            if (timer) {
-                clearTimeout(timer);
-                setTimer(null);
-            }
-
             const timerEl = setTimeout(() => {
                 const tags = TagsCollection.find().fetch().filter(tag => tag.text.startsWith(input)).filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
                 setTags([...tags, ...task.tags]);
