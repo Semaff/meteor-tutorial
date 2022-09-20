@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -7,59 +7,9 @@ import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Autocomplete, Box, TextField } from '@mui/material';
-import { useTracker } from "meteor/react-meteor-data";
-import { Meteor } from "meteor/meteor";
-import { TagsCollection } from '../../db/TagsCollection';
-import { TasksCollection } from '../../db/TasksCollection';
 
-const onTagAdd = (taskId, tagId) => {
-    Meteor.call('tasks.setTags', taskId, tagId);
-}
-
-const Task = ({ task, onCheckBoxClick, onDeleteClick }) => {
-    const [input, setInput] = useState("");
-    const [tags, setTags] = useState([]);
-    const [isLoading, setIsLoading] = useState();
-    const [timer, setTimer] = useState(null);
-
-    useTracker(() => {
-        const handler = Meteor.subscribe("taskTagsCount", task._id);
-        if (!handler.ready()) {
-            return { isLoading: true };
-        }
-
-        const tagsCount = TasksCollection.findOne();
-        console.log(tagsCount)
-        return {};
-    })
-
-    useTracker(() => {
-        const handler = Meteor.subscribe("tags");
-        if (!handler.ready()) {
-            setIsLoading(true);
-            return { isLoading: true };
-        }
-
-        if (timer) {
-            clearTimeout(timer);
-            setTimer(null);
-        }
-
-        if (input.length <= 1) {
-            const tags = TagsCollection.find({}, { limit: 10 }).fetch().filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
-            setTags([...tags, ...task.tags]);
-            setIsLoading(false);
-        } else {
-            const timerEl = setTimeout(() => {
-                const tags = TagsCollection.find().fetch().filter(tag => tag.text.startsWith(input)).filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
-                setTags([...tags, ...task.tags]);
-                setIsLoading(false);
-            }, 300);
-            setTimer(timerEl);
-        }
-
-        return {};
-    }, [input]);
+const Task = memo(({ task, tags = [], areTagsLoading, onCheckBoxClick, onDeleteClick, onInputChange, onTagsChange }) => {
+    const filteredTags = tags.filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
 
     return (
         <ListItem
@@ -96,17 +46,17 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick }) => {
 
                     /* Configure options and values */
                     isOptionEqualToValue={(option, value) => option._id === value._id}
-                    options={tags}
+                    options={[...filteredTags, ...task.tags]}
                     value={task.tags}
                     onChange={(event, values) => {
-                        onTagAdd(task._id, values)
+                        onTagsChange(task._id, values)
                     }}
 
-                    loading={isLoading}
+                    loading={areTagsLoading}
 
                     filterOptions={(x) => x}
                     onInputChange={(event, newInputValue) => {
-                        setInput(newInputValue);
+                        onInputChange(newInputValue);
                     }}
 
                     getOptionLabel={(tag) => tag.text}
@@ -123,6 +73,6 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick }) => {
             </Box>
         </ListItem >
     )
-}
+});
 
 export default Task;
