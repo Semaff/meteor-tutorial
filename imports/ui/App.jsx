@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
-import { TasksCollection } from '../db/TasksCollection';
 import TaskForm from './Task/TaskForm';
 import LoginForm from './Auth/LoginForm';
 import Navbar from './Navbar/Navbar';
@@ -10,6 +9,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import { TasksCollection } from '../api/tasks/TasksCollection';
 
 export const App = () => {
     const [hideCompleted, setHideCompleted] = useState(false);
