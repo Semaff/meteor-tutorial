@@ -1,15 +1,15 @@
 import { Meteor } from "meteor/meteor";
 import { TagsCollection } from "../TagsCollection";
 
-Meteor.publish("tags", function publishTasks(query) {
-    const search = {};
+Meteor.publish("tags", function publishTasks() {
+    // const search = {};
 
-    if (query) {
-        search.text = {
-            $regex: query,
-            $options: "gi"
-        }
-    }
+    // if (query) {
+    //     search.text = {
+    //         $regex: query,
+    //         $options: "gi"
+    //     }
+    // }
 
-    return TagsCollection.find(search, { limit: 50 });
+    return TagsCollection.find({}, { limit: 50 });
 })
