@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import List from '@mui/material/List';
 import Task from './Task';
-import { useTracker } from "meteor/react-meteor-data";
 import { Box, Typography } from '@mui/material';
-import { TagsCollection } from '../../api/tags/TagsCollection';
+import { Meteor } from "meteor/meteor";
+// import { useTracker } from "meteor/react-meteor-data";
+// import { TagsCollection } from '../../api/tags/TagsCollection';
 
 const toggleChecked = ({ _id, isChecked }) => {
     Meteor.call('tasks.setIsChecked', _id, !isChecked);
@@ -18,35 +19,35 @@ const changeTaskTags = (taskId, tags) => {
 }
 
 const TaskList = ({ tasks }) => {
-    const [search, setSearch] = useState("");
-    const [input, setInput] = useState("");
-    const [timer, setTimer] = useState(null);
+    // const [tags, setTags] = useState([]);
+    // const [input, setInput] = useState("");
+    // const [timer, setTimer] = useState(null);
 
-    useEffect(() => {
-        if (timer) {
-            clearTimeout(timer);
-            setTimer(null);
-        }
+    // useEffect(() => {
+    //     const handler = Meteor.subscribe("tags");
 
-        const timerEl = setTimeout(() => {
-            setSearch(input);
-        }, 300);
+    //     if (timer) {
+    //         clearTimeout(timer);
+    //         setTimer(null);
+    //     }
 
-        setTimer(timerEl);
-    }, [input]);
+    //     if (input.length <= 1) {
+    //         setTags(TagsCollection.find().fetch().slice(0, 10));
+    //     } else {
+    //         const timerEl = setTimeout(() => {
+    //             setTags(TagsCollection.find({
+    //                 text: {
+    //                     $regex: input,
+    //                     $options: "gi"
+    //                 }
+    //             }).fetch());
+    //         }, 300);
 
-    const { tags, areTagsLoading } = useTracker(() => {
-        const handler = Meteor.subscribe("tags", search);
-        if (!handler.ready()) {
-            return { areTagsLoading: true };
-        }
+    //         setTimer(timerEl);
+    //     }
 
-        if (search.length <= 1) {
-            return { tags: TagsCollection.find().fetch().slice(0, 10) }
-        }
-
-        return { tags: TagsCollection.find().fetch() }
-    });
+    //     return () => handler.stop();
+    // }, [input]);
 
     return (
         <Box className='box'>
@@ -57,12 +58,11 @@ const TaskList = ({ tasks }) => {
                             <Task
                                 key={task._id}
                                 task={task}
-                                tags={tags}
-                                areTagsLoading={areTagsLoading}
+                                // tags={tags}
                                 onCheckBoxClick={toggleChecked}
                                 onDeleteClick={deleteTask}
                                 onTagsChange={changeTaskTags}
-                                onInputChange={setInput}
+                                // onInputChange={setInput}
                             />
                         ))}
                     </List>
