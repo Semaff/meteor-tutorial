@@ -1,14 +1,45 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Autocomplete, Box, TextField } from '@mui/material';
+import { TagsCollection } from '../../api/tags/TagsCollection';
 
-const Task = memo(({ task, tags = [], areTagsLoading, onCheckBoxClick, onDeleteClick, onInputChange, onTagsChange }) => {
+const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputChange, onTagsChange }) => {
+    const [tags, setTags] = useState([]);
+    const [input, setInput] = useState("");
+    const [timer, setTimer] = useState(null);
+
+    useEffect(() => {
+        const handler = Meteor.subscribe("tags");
+
+        if (timer) {
+            clearTimeout(timer);
+            setTimer(null);
+        }
+
+        if (input.length <= 1) {
+            setTags(TagsCollection.find().fetch().slice(0, 10));
+        } else {
+            const timerEl = setTimeout(() => {
+                setTags(TagsCollection.find({
+                    text: {
+                        $regex: input,
+                        $options: "gi"
+                    }
+                }).fetch());
+            }, 300);
+
+            setTimer(timerEl);
+        }
+
+        return () => handler.stop();
+    }, [input]);
+
     const filteredTags = tags.filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
 
     return (
@@ -52,11 +83,9 @@ const Task = memo(({ task, tags = [], areTagsLoading, onCheckBoxClick, onDeleteC
                         onTagsChange(task._id, values)
                     }}
 
-                    loading={areTagsLoading}
-
                     filterOptions={(x) => x}
                     onInputChange={(event, newInputValue) => {
-                        onInputChange(newInputValue);
+                        setInput(newInputValue);
                     }}
 
                     getOptionLabel={(tag) => tag.text}
