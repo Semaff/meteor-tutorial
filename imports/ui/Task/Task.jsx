@@ -21,21 +21,23 @@ const asyncCallMethod = (methodName, ...args) => {
     });
 }
 
-const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputChange, onTagsChange }) => {
+const Task = ({ task, onCheckBoxClick, onDeleteClick, onTagsChange }) => {
     const [tags, setTags] = useState([]);
     const [input, setInput] = useState("");
     const [search, setSearch] = useState("");
     const [timer, setTimer] = useState(null);
 
     useEffect(() => {
-        async function fetchTags() {
-            const tags = await asyncCallMethod("tags.getAll", { limit: 10 });
-            if (tags) {
-                setTags(tags);
+        if (tags.length === 0) {
+            async function fetchTags() {
+                const tags = await asyncCallMethod("tags.getAll", { limit: 10 });
+                if (tags) {
+                    setTags(tags);
+                }
             }
-        }
 
-        fetchTags();
+            fetchTags();
+        }
     }, []);
 
     useEffect(() => {
@@ -46,7 +48,7 @@ const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputCh
 
         const timerEl = setTimeout(() => {
             setSearch(input);
-        }, 300);
+        }, 500);
 
         setTimer(timerEl);
     }, [input]);
@@ -130,6 +132,6 @@ const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputCh
             </Box>
         </ListItem >
     )
-});
+};
 
 export default Task;
