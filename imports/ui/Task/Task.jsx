@@ -12,33 +12,38 @@ import { TagsCollection } from '../../api/tags/TagsCollection';
 const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputChange, onTagsChange }) => {
     const [tags, setTags] = useState([]);
     const [input, setInput] = useState("");
+    const [search, setSearch] = useState("");
     const [timer, setTimer] = useState(null);
 
     useEffect(() => {
-        const handler = Meteor.subscribe("tags");
-
         if (timer) {
             clearTimeout(timer);
             setTimer(null);
         }
 
-        if (input.length <= 1) {
+        const timerEl = setTimeout(() => {
+            setSearch(input);
+        }, 300);
+
+        setTimer(timerEl);
+    }, [input])
+
+    useEffect(() => {
+        const handler = Meteor.subscribe("tags");
+
+        if (search.length <= 1) {
             setTags(TagsCollection.find().fetch().slice(0, 10));
         } else {
-            const timerEl = setTimeout(() => {
-                setTags(TagsCollection.find({
-                    text: {
-                        $regex: input,
-                        $options: "gi"
-                    }
-                }).fetch());
-            }, 300);
-
-            setTimer(timerEl);
+            setTags(TagsCollection.find({
+                text: {
+                    $regex: search,
+                    $options: "gi"
+                }
+            }).fetch());
         }
 
         return () => handler.stop();
-    }, [input]);
+    }, [search]);
 
     const filteredTags = tags.filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
 
