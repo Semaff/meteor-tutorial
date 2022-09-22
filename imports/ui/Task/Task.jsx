@@ -7,13 +7,36 @@ import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Autocomplete, Box, TextField } from '@mui/material';
-import { TagsCollection } from '../../api/tags/TagsCollection';
+import { Meteor } from "meteor/meteor";
+
+const asyncCallMethod = (methodName, ...args) => {
+    return new Promise((resolve, reject) => {
+        Meteor.call(methodName, ...args, (error, result) => {
+            if (error) {
+                reject(error);
+            }
+
+            resolve(result);
+        });
+    });
+}
 
 const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputChange, onTagsChange }) => {
     const [tags, setTags] = useState([]);
     const [input, setInput] = useState("");
     const [search, setSearch] = useState("");
     const [timer, setTimer] = useState(null);
+
+    useEffect(() => {
+        async function fetchTags() {
+            const tags = await asyncCallMethod("tags.getAll", { limit: 10 });
+            if (tags) {
+                setTags(tags);
+            }
+        }
+
+        fetchTags();
+    }, []);
 
     useEffect(() => {
         if (timer) {
@@ -26,24 +49,24 @@ const Task = memo(({ task, /* tags ,*/ onCheckBoxClick, onDeleteClick, onInputCh
         }, 300);
 
         setTimer(timerEl);
-    }, [input])
+    }, [input]);
 
     useEffect(() => {
-        const handler = Meteor.subscribe("tags");
+        async function fetchTags() {
+            let tags;
+            if (search.length <= 1) {
+                tags = await asyncCallMethod("tags.getAll", { limit: 10 });
+            } else {
+                tags = await asyncCallMethod("tags.getAll", { query: search, limit: 50 });
+            }
 
-        if (search.length <= 1) {
-            setTags(TagsCollection.find().fetch().slice(0, 10));
-        } else {
-            setTags(TagsCollection.find({
-                text: {
-                    $regex: search,
-                    $options: "gi"
-                }
-            }).fetch());
+            if (tags) {
+                setTags(tags);
+            }
         }
 
-        return () => handler.stop();
-    }, [search]);
+        fetchTags();
+    }, [search])
 
     const filteredTags = tags.filter(tag => task.tags.find(taskTag => taskTag._id === tag._id) ? false : true);
 
