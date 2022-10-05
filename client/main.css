@@ -31,7 +31,7 @@ body {
   flex-direction: column;
 
   background-color: white;
-  box-shadow: 0 0 20px rgba(#000, 30%);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 30%);
   max-width: 560px;
   min-width: 260px;
   margin: 10px auto;
