@@ -1,28 +1,36 @@
 {
-    "name": "meteor-tutorial",
-    "private": true,
-    "scripts": {
-        "start": "meteor run",
-        "test": "meteor test --once --driver-package meteortesting:mocha",
-        "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-        "visualize": "meteor --production --extra-packages bundle-visualizer"
+  "name": "meteor-tutorial",
+  "private": true,
+  "scripts": {
+    "start": "meteor run",
+    "test": "meteor test --once --driver-package meteortesting:mocha",
+    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
+    "visualize": "meteor --production --extra-packages bundle-visualizer"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.17.9",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/icons-material": "^5.10.3",
+    "@mui/material": "^5.10.5",
+    "bcrypt": "^5.0.1",
+    "meteor-node-stubs": "^1.2.1",
+    "random-words": "^1.2.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.4.1"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.jsx",
+      "server": "server/main.js"
     },
-    "dependencies": {
-        "@babel/runtime": "^7.17.9",
-        "@emotion/react": "^11.10.4",
-        "@emotion/styled": "^11.10.4",
-        "@mui/icons-material": "^5.10.3",
-        "@mui/material": "^5.10.5",
-        "bcrypt": "^5.0.1",
-        "meteor-node-stubs": "^1.2.1",
-        "react": "^17.0.2",
-        "react-dom": "^17.0.2"
-    },
-    "meteor": {
-        "mainModule": {
-            "client": "client/main.jsx",
-            "server": "server/main.js"
-        },
-        "testModule": "tests/main.js"
-    }
+    "testModule": "tests/main.js"
+  },
+  "devDependencies": {
+    "@types/meteor": "^2.7.1",
+    "@types/mocha": "^10.0.0",
+    "@types/react": "^18.0.21",
+    "@types/react-dom": "^18.0.6"
+  }
 }
