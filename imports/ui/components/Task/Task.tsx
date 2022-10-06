@@ -3,8 +3,8 @@ import { ListItem, ListItemButton, ListItemText, ListItemIcon, Checkbox, IconBut
 import { Delete } from '@mui/icons-material';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import { asyncCallMeteorMethod } from '../../utils/asyncCallMeteorMethod';
-import { ITask } from '/imports/types/ITask';
-import { ITag } from '/imports/types/ITag';
+import { ITag } from '/imports/api/tags/TagsCollection';
+import { ITask } from '/imports/api/tasks/TasksCollection';
 
 interface TaskProps {
   task: ITask,
@@ -22,7 +22,7 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick, onTagsChange }: TaskProps)
   useEffect(() => {
     if (tags.length === 0) {
       async function fetchTags() {
-        const tags = await asyncCallMeteorMethod("tags.getAll", { limit: 10 }) as ITag[];
+        const tags = await asyncCallMeteorMethod<ITag[]>("tags.getAll", { limit: 10 });
         if (tags) {
           setTags(tags);
         }
@@ -47,11 +47,11 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick, onTagsChange }: TaskProps)
 
   useEffect(() => {
     async function fetchTags() {
-      let tags;
+      let tags: ITag[];
       if (search.length <= 1) {
-        tags = await asyncCallMeteorMethod("tags.getAll", { limit: 10 });
+        tags = await asyncCallMeteorMethod<ITag[]>("tags.getAll", { limit: 10 });
       } else {
-        tags = await asyncCallMeteorMethod("tags.getAll", { query: search, limit: 50 });
+        tags = await asyncCallMeteorMethod<ITag[]>("tags.getAll", { query: search, limit: 50 });
       }
 
       if (tags) {
@@ -102,7 +102,9 @@ const Task = ({ task, onCheckBoxClick, onDeleteClick, onTagsChange }: TaskProps)
           options={[...filteredTags, ...task.tags]}
           value={task.tags}
           onChange={(_, values) => {
-            onTagsChange(task._id, values)
+            if (task._id) {
+              onTagsChange(task._id, values)
+            }
           }}
 
           filterOptions={(x) => x}
