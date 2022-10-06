@@ -9,8 +9,8 @@ import { Meteor } from 'meteor/meteor';
 import { TasksCollection } from '/imports/api/tasks/TasksCollection';
 import { userFilter } from '../filters/userFilter';
 import TaskList from '../components/Task/TaskList';
-import { ITask } from '/imports/types/ITask';
 import { pendingOnlyFilter } from '../filters/pendingTodoFilter';
+import Navbar from '../components/Navbar/Navbar';
 
 const TasksPage = () => {
   const [hideCompleted, setHideCompleted] = useState(false);
@@ -18,8 +18,8 @@ const TasksPage = () => {
     return Meteor.user()
   });
 
-  const { tasks, isLoading } = useTracker(() => {
-    const noDataAvailable = { tasks: [] };
+  const { tasks, pendingTasksCount, isLoading } = useTracker(() => {
+    const noDataAvailable = { tasks: [], pendingTasksCount: 0 };
     if (!user) {
       return { ...noDataAvailable, isLoading: false };
     }
@@ -29,18 +29,27 @@ const TasksPage = () => {
       return { ...noDataAvailable, isLoading: true };
     }
 
-    const tasks = TasksCollection.find(
-      hideCompleted ? pendingOnlyFilter(user) : userFilter(user),
-      {
-        sort: { createdAt: -1 }
-      }
-    ).fetch() as ITask[];
+    let filter;
+    if (hideCompleted) {
+      filter = pendingOnlyFilter(user);
+    } else {
+      filter = userFilter(user);
+    }
 
-    return { tasks, isLoading: false };
+    const tasks = TasksCollection.find(filter, { sort: { createdAt: -1 } }).fetch();
+    const pendingTasksCount = TasksCollection.find(pendingOnlyFilter(user)).count();
+    return { tasks, pendingTasksCount, isLoading: false };
   });
+
+  const pendingTasksTitle = `${pendingTasksCount ? ` (${pendingTasksCount})` : ''}`;
 
   return (
     <>
+      <Navbar
+        user={user}
+        pendingTasksTitle={pendingTasksTitle}
+      />
+
       <TaskForm />
 
       <Stack display={"flex"} justifyContent="center" spacing={2} direction="row">
@@ -48,7 +57,6 @@ const TasksPage = () => {
           {hideCompleted ? "Show All" : "Hide Completed"}
         </Button>
       </Stack>
-
 
       {isLoading && (
         <Box className='box'>
