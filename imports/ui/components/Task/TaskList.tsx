@@ -3,8 +3,8 @@ import List from '@mui/material/List';
 import Task from './Task';
 import { Box, Typography } from '@mui/material';
 import { Meteor } from "meteor/meteor";
-import { ITask } from '/imports/types/ITask';
-import { ITag } from '/imports/types/ITag';
+import { ITask } from '/imports/api/tasks/TasksCollection';
+import { ITag } from '/imports/api/tags/TagsCollection';
 
 const toggleChecked = ({ _id, isChecked }: Partial<ITask>) => {
   Meteor.call('tasks.setIsChecked', _id, !isChecked);
