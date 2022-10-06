@@ -1,16 +1,16 @@
 import { TagsCollection } from "../../imports/api/tags/TagsCollection";
 import randowWords from "random-words";
 
-const insertTag = (tag) => {
-  const possibleTag = TagsCollection.findOne({ text: tag });
+const insertTag = (tagText: string) => {
+  const possibleTag = TagsCollection.findOne({ text: tagText });
   if (possibleTag) {
-    const newTag = randowWords({ exactly: 1 });
+    const newTag = randowWords({ exactly: 1 }).join("");
     insertTag(newTag);
     return;
   }
 
   TagsCollection.insert({
-    text: tag,
+    text: tagText,
     createdAt: new Date()
   })
 };
