@@ -1,9 +1,5 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import { Button, Typography, Toolbar, Box, AppBar } from "@mui/material";
 import { Meteor } from "meteor/meteor";
 
 interface NavbarProps {
